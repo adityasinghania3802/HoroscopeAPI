@@ -1,0 +1,21 @@
+# Node.js dependencies
+node_modules/
+.env
+
+# Logs
+npm-debug.log*
+*.log
+
+# Build artifacts
+build/
+dist/
+
+# Operating System files
+.DS_Store
+
+# Temporary files
+tmp/
+temp/
+
+# Other
+*.tgz
