@@ -5,6 +5,7 @@ Express + MongoDB + JWT API that:
 - Signs up and logs in users
 - Auto-detects zodiac sign from birthdate
 - Returns a daily horoscope and a 7‑day history
+- I have used Copilot while coding (AI Tool).
 
 ### Prerequisites
 
@@ -44,13 +45,13 @@ Steps:
 - Horoscope > History
 
 
-## Design decisions (brief)
+## Design decisions
 
-- Simplicity first: Express server with minimal dependencies; no external horoscope APIs.
-- Deterministic generation: `utils/horoscopes.js` uses a base message per zodiac and a date-derived "lucky number" for daily variety without persistence.
+- Express server with minimal dependencies; no external horoscope APIs.
+- `utils/horoscopes.js` uses a base message per zodiac and a date-derived "lucky number" for daily variety without persistence.
 - Auth with JWT: Short, stateless session tokens; user password hashed (bcrypt).
-- Derived data: Zodiac sign is computed from birthdate on signup and stored with the user for quick lookups.
-- History model: `History` collection stores one document per user per day (unique index on `user + servedForDate`) for idempotent writes and fast history queries.
+- Zodiac sign is computed from birthdate on signup and stored with the user for quick lookups.
+- `History` collection stores one document per user per day (unique index on `user + servedForDate`) for idempotent writes and fast history queries.
 - Backfill on read: The history endpoint fills any missing days for the requested window by computing and upserting records per day (idempotent), so clients always receive a contiguous range.
 - UTC-normalized dates: All daily boundaries use UTC (`startOfUTCDay`) to avoid timezone drift.
 
@@ -65,16 +66,8 @@ Steps:
 
 ## Scaling to personalized (per-user) horoscopes
 
-
-
 - Don’t create the horoscope when the user opens the app. Create everyone’s next-day horoscope at night and save it.
-
-
 - Put today’s text in a fast store (like a “short-term memory”). When the user asks, read from there first.
-
 - If nothing is ready, show a simple backup message now and generate the real one in the background for next time.
-
 - Use multiple worker processes/machines to create horoscopes in parallel so it’s fast even for many users.
-
-
 - If generation fails, retry a few times and fall back to the simple message so users aren’t blocked.
